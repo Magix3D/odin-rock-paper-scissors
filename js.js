@@ -1,57 +1,54 @@
+// --- State ---
 let humanScore = 0;
 let computerScore = 0;
-let humanChoice = "";
-let roundWinner = "";
+const result = document.getElementById("result");
 
-let getHumanChoice = () => humanChoice = prompt("Input the hand sign of your choice :)");
+// --- Pure utility functions ---
+const choices = ["rock", "paper", "scissors"];
 
-let handSign = () => {
-  let randomNumber = Math.random();
-  if (randomNumber < 0.33) {
-    return "rock";
-  } else if (randomNumber < 0.66) {
-    return "paper";
+const getComputerChoice = () =>
+  choices[Math.floor(Math.random() * choices.length)];
+
+const determineWinner = (human, computer) => {
+  if (human === computer) return "tie";
+
+  const humanWins =
+    (human === "rock" && computer === "scissors") ||
+    (human === "scissors" && computer === "paper") ||
+    (human === "paper" && computer === "rock");
+
+  return humanWins ? "player" : "computer";
+};
+
+// --- Game logic ---
+const playRound = (humanChoice) => {
+  const computerChoice = getComputerChoice();
+  const winner = determineWinner(humanChoice, computerChoice);
+
+  if (winner === "player") humanScore++;
+  if (winner === "computer") computerScore++;
+
+  // Check immediately after updating score
+  if (humanScore === 3 || computerScore === 3) {
+    const winnerText =
+      humanScore > computerScore ? "Human won 🙆🏽‍♂️" : "Computer won 🤖";
+
+    result.textContent = winnerText;
+
+    // reset scores for next game
+    humanScore = 0;
+    computerScore = 0;
+    return; // stop here, do NOT print score again
   }
-  return "scissors";
+
+  updateScore();
 };
 
-let playRound = (humanChoice, computerChoice) => {
-    console.log(`Human: ${humanChoice}, Computer: ${computerChoice}`);
-    humanChoice = humanChoice.toLowerCase();
-    if (humanChoice === computerChoice) {
-        roundWinner = 'tie'
-    }
-    if (
-        (humanChoice === 'rock' && computerChoice === 'scissors') ||
-        (humanChoice === 'scissors' && computerChoice === 'paper') ||
-        (humanChoice === 'paper' && computerChoice === 'rock')
-    ) {
-        humanScore++
-        roundWinner = 'player'
-    }
-    if (
-        (computerChoice === 'rock' && humanChoice === 'scissors') ||
-        (computerChoice === 'scissors' && humanChoice === 'paper') ||
-        (computerChoice === 'paper' && humanChoice === 'rock')
-    ) {
-        computerScore++
-        roundWinner = 'computer'
-    }
+const updateScore = () => {
+  result.textContent = `Human: ${humanScore}, Computer: ${computerScore}`;
 };
 
-let gameWinner = () => (humanScore > computerScore) ? alert("Human won 🙆🏽‍♂️") : alert("Computer won 🤖")
-
-let playGame = () => {
-    for(let i = 0; i < 5; i++) {
-        playRound(
-            getHumanChoice(),
-            handSign()
-        );
-        console.log("Winner round " + (i + 1) + ": " + roundWinner)
-    };
-    gameWinner()
-};
-
-/*RUN*/
-
-playGame();
+// --- Event binding ---
+["rock", "paper", "scissors"].forEach((id) => {
+  document.getElementById(id).addEventListener("click", () => playRound(id));
+});
